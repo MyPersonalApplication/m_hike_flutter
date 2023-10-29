@@ -12,10 +12,11 @@ class HikePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HikePage> {
+  SQLHelper sqlHelper = SQLHelper();
   List<Hike> lstHikes = [];
 
   void _refreshHikes() async {
-    List<Map<String, dynamic>> dataList = await SQLHelper.getHikes();
+    List<Map<String, dynamic>> dataList = await sqlHelper.getHikes();
     List<Hike> itemList = dataList.map((data) => Hike.fromMap(data)).toList();
     setState(() {
       lstHikes = itemList;
@@ -82,7 +83,7 @@ class _HomePageState extends State<HikePage> {
   }
 
   void _handleAddHike(Hike hike) async {
-    await SQLHelper.insertHike(hike.toMap());
+    await sqlHelper.insertHike(hike.toMap());
     setState(() {
       lstHikes.add(hike);
     });
@@ -104,7 +105,7 @@ class _HomePageState extends State<HikePage> {
   }
 
   void _handleEditHike(Hike hike) async {
-    await SQLHelper.updateHike(hike.toMap());
+    await sqlHelper.updateHike(hike.toMap());
     setState(() {
       final index = lstHikes.indexWhere((element) => element.id == hike.id);
       if (index != -1) {
@@ -114,7 +115,7 @@ class _HomePageState extends State<HikePage> {
   }
 
   void _handleDeleteHike(int id) async {
-    await SQLHelper.deleteHike(id);
+    await sqlHelper.deleteHike(id);
     setState(() {
       lstHikes.removeWhere((element) => element.id == id);
     });
