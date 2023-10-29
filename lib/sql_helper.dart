@@ -1,6 +1,9 @@
-import 'package:sqflite/sqflite.dart' as sql;
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
 
 class SQLHelper {
+  Database? _db;
+
   static const String CREATE_TABLE = "CREATE TABLE IF NOT EXISTS ";
   static const String INTEGER = " INTEGER ";
   static const String TEXT = " TEXT ";
@@ -113,54 +116,63 @@ class SQLHelper {
 
   static const String DROP_TABLE_HIKE = DROP_TABLE + TABLE_HIKE + SEMICOLON;
 
-  static Future<void> createTables(sql.Database db) async {
-    await db.execute(CREATE_TABLE_HIKE);
+  Future<Database> get database async {
+    if (_db != null) return _db!;
+
+    _db = await _initDatabase();
+    return _db!;
   }
 
-  static Future<void> dropTables(sql.Database db) async {
-    await db.execute(DROP_TABLE_HIKE);
-  }
+  Future<Database> _initDatabase() async {
+    String databasePath = await getDatabasesPath();
+    String path = join(databasePath, DATABASE_NAME);
 
-  static Future<sql.Database> db() async {
-    return sql.openDatabase(
-      DATABASE_NAME,
+    return await openDatabase(
+      path,
       version: DATABASE_VERSION,
-      onCreate: (sql.Database db, int version) async {
-        await createTables(db);
+      onCreate: (db, version) async {
+        createTables(db);
       },
-      onUpgrade: (sql.Database db, int oldVersion, int newVersion) async {
-        await dropTables(db);
-        await createTables(db);
+      onUpgrade: (db, oldVersion, newVersion) async {
+        dropTables(db);
+        createTables(db);
       },
     );
   }
 
-  static Future<int> insertHike(Map<String, dynamic> hike) async {
-    final sql.Database db = await SQLHelper.db();
-    final int id = await db.insert(TABLE_HIKE, hike);
-    return id;
+  Future<void> createTables(Database db) async {
+    await db.execute(CREATE_TABLE_HIKE);
   }
 
-  static Future<List<Map<String, dynamic>>> getHikes() async {
-    final sql.Database db = await SQLHelper.db();
+  Future<void> dropTables(Database db) async {
+    await db.execute(DROP_TABLE_HIKE);
+  }
+
+  Future<int> insertHike(Map<String, dynamic> hike) async {
+    final db = await database;
+    return await db.insert(TABLE_HIKE, hike);
+  }
+
+  Future<List<Map<String, dynamic>>> getHikes() async {
+    final db = await database;
     return db.query(TABLE_HIKE, orderBy: HIKE_DATE + DESC);
   }
 
-  static Future<Map<String, dynamic>> getHike(String id) async {
-    final sql.Database db = await SQLHelper.db();
+  Future<Map<String, dynamic>> getHike(String id) async {
+    final db = await database;
     final List<Map<String, dynamic>> maps =
         await db.query(TABLE_HIKE, where: "$HIKE_ID = ?", whereArgs: [id]);
     return maps.first;
   }
 
-  static Future<int> updateHike(Map<String, dynamic> hike) async {
-    final sql.Database db = await SQLHelper.db();
+  Future<int> updateHike(Map<String, dynamic> hike) async {
+    final db = await database;
     return db.update(TABLE_HIKE, hike,
         where: "$HIKE_ID = ?", whereArgs: [hike[HIKE_ID]]);
   }
 
-  static Future<int> deleteHike(int id) async {
-    final sql.Database db = await SQLHelper.db();
+  Future<int> deleteHike(int id) async {
+    final db = await database;
     return db.delete(TABLE_HIKE, where: "$HIKE_ID = ?", whereArgs: [id]);
   }
 }
