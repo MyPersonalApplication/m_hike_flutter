@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:m_hike/page/home_page.dart';
-import 'package:m_hike/sql_helper.dart';
 
 void main() {
   runApp(const MyApp());

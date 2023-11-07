@@ -85,7 +85,7 @@ class _HomePageState extends State<HikePage> {
   void _handleAddHike(Hike hike) async {
     await sqlHelper.insertHike(hike.toMap());
     setState(() {
-      lstHikes.add(hike);
+      lstHikes.insert(0, hike);
     });
   }
 
