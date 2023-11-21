@@ -18,6 +18,7 @@ class HikeModelBottom extends StatefulWidget {
 class _HikeModelBottomState extends State<HikeModelBottom> {
   // Declare global key for form validation
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final RegExp numberRegExp = RegExp(r'^-?\d*\.?\d+$');
 
   // Declare variables to store the user's input
   TextEditingController nameController = TextEditingController();
@@ -49,12 +50,18 @@ class _HikeModelBottomState extends State<HikeModelBottom> {
     if (value == null || value.isEmpty) {
       return 'Latitude is required';
     }
+    if (!numberRegExp.hasMatch(value)) {
+      return 'Latitude must be a number';
+    }
     return null;
   }
 
   String? validateLongitude(String? value) {
     if (value == null || value.isEmpty) {
       return 'Longitude is required';
+    }
+    if (!numberRegExp.hasMatch(value)) {
+      return 'Longitude must be a number';
     }
     return null;
   }
@@ -69,6 +76,9 @@ class _HikeModelBottomState extends State<HikeModelBottom> {
   String? validateLength(String? value) {
     if (value == null || value.isEmpty) {
       return 'Length is required';
+    }
+    if (!numberRegExp.hasMatch(value)) {
+      return 'Length must be a number';
     }
     return null;
   }
